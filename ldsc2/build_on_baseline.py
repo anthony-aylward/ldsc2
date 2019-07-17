@@ -19,7 +19,9 @@ import subprocess
 
 from multiprocessing import Pool
 
-from ldsc2.env import DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
+from ldsc2.env import (
+    DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
+)
 
 
 
@@ -70,11 +72,10 @@ def write_annot(args, genome, annotation, chromosome):
 
 
 def ldsc(args, annotation, chromosome):
-    subprocess.call(
+    subprocess.run(
         (
-            ('/home/data/ldsc/ldsc.py',)
-        )
-        + (
+            ANACONDA_PATH,
+            os.path.join(DIR, 'ldsc.py'),
             '--l2',
             '--bfile', '{}.{}'.format(args.plink_prefix, chromosome),
             '--ld-wind-cm', '1',

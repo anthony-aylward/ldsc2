@@ -6,20 +6,34 @@
 
 import os
 import os.path
+import subprocess
 
 from argparse import ArgumentParser
 from git import Git
+from hashlib import sha256
 from urllib.request import urlopen
 from shutil import copyfileobj
 from tarfile import TarFile
+from tempfile import TemporaryDirectory
 
-from ldsc2.env import DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
+from ldsc2.env import (
+    DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
+)
 
 
 
 
 # Constants ====================================================================
 
+ANACONDA_URL = os.environ.get(
+    'LDSC_ANACONDA_URL',
+    'https://repo.anaconda.com/archive/Anaconda2-2019.03-Linux-x86_64.sh'
+)
+ANACONDA_HASH = os.environ.get(
+    'LDSC_ANACONDA_HASH',
+    'cedfee5b5a3f62fcdac0a1d2d12396d0f232d2213d24d6dc893df5d8e64b8773'
+)
+CONDA_PATH = os.path.join(ANACONDA_DIR, 'bin', 'conda')
 LDSC_GITHUB_REPO = 'https://github.com/bulik/ldsc.git'
 PLINKFILES_URL = 'https://data.broadinstitute.org/alkesgroup/LDSCORE/1000G_Phase3_plinkfiles.tgz'
 PLINKFILES_EAS_URL = 'https://data.broadinstitute.org/alkesgroup/LDSCORE/1000G_Phase3_EAS_plinkfiles.tgz'
@@ -30,19 +44,59 @@ HAPMAP3_SNPS_URL = 'https://data.broadinstitute.org/alkesgroup/LDSCORE/hapmap3_s
 
 # Functions ====================================================================
 
+def download_anaconda_install_script(anaconda_install_script_path):
+    print(
+        'Downloading Anaconda2 install script to '
+        f'{anaconda_install_script_path}'
+    )
+    with urlopen(ANACONDA_URL) as (
+        response
+    ), open(anaconda_install_script_path, 'wb') as (
+        f
+    ):
+        copyfileobj(response, f)
+
+
+def check_hash(anaconda_install_script_path):
+    print(f'checking hash of {anaconda_install_script_path}')
+    with open(anaconda_install_script_path, 'rb') as f:
+        if sha256(f.read()).hexdigest() != ANACONDA_HASH:
+            raise RuntimeError(f'hash check failed for {ANACONDA_URL}')
+
+
+def install_anaconda(anaconda_install_script_path):
+    input(
+        'installing Anaconda2. When prompted, specify the following '
+        f'install location:\n{ANACONDA_DIR}\npress ENTER to '
+        'continue >>>'
+    )
+    subprocess.run(('bash', anaconda_install_script_path))
+
+
+def configure_anaconda():
+    print('configuring Anaconda2')
+    subprocess.run(
+        (
+            CONDA_PATH, 'env', 'create',
+            '--file', os.path.join(DIR, 'LDSC', 'environment.yml')
+        )
+    )
+
+
+def clone_ldsc():
+    print(
+        'cloning the LDSC github repo to '
+        f"{os.path.join(os.path.dirname(DIR), 'LDSC')}"
+    )
+    Git(os.path.dirname(DIR)).clone(LDSC_GITHUB_REPO)
+
+
 def download(
-    ldsc_dir: str = DIR,
     hapmap3_snps_dir: str = HAPMAP3_SNPS,
     plinkfiles_dir: str = PLINKFILES,
     plinkfiles_eas_dir: str = PLINKFILES_EAS,
     quiet: bool = False
 ):
-    if not quiet:
-        print(
-            f"Cloning LDSC repository to {os.path.join(ldsc_dir, 'LDSC')}"
-        )
-    Git(ldsc_dir).clone(LDSC_GITHUB_REPO)
-
     for data_url, data_dir in (
         (HAPMAP3_SNPS_URL, hapmap3_snps_dir),
         (PLINKFILES_URL, plinkfiles_dir),
@@ -77,7 +131,7 @@ def parse_arguments():
         metavar='<dest/for/plinkfiles/dir>',
         default=PLINKFILES,
         help=(
-            'destination for downloaded plink files'
+            'destination for downloaded EUR plink files'
             f'[{PLINKFILES}]'
         )
     )
@@ -110,9 +164,63 @@ def parse_arguments():
 def main():
     args = parse_arguments()
     download(
-        ldsc_dir=args.ldsc_dir,
         plinkfiles_dir=args.plinkfiles,
         plinkfiles_eas_dir=args.plinkfiles,
         hapmap3_snps_dir=args.hapmap3_snps,
         quiet=args.quiet
     )
+    if os.path.isdir(ANACONDA_DIR):
+        use_existing_anaconda_dir = (
+            input(
+                f'There is already a directory at {ANACONDA_DIR} - is this the '
+                'anaconda you wish to use? ([y]/n) >>>'
+            ).casefold()
+            in {'', 'y', 'yes'}
+        )
+        if not use_existing_anaconda_dir:
+            print(
+                'Please change the value of environment variable '
+                'LDSC2_ANACONDA_DIR or remove the existing directory at '
+                'that location.'
+            )
+            return
+    elif os.path.exists(ANACONDA_DIR):
+        raise RuntimeError(
+            f'There is a non-directory file at {ANACONDA_DIR}. Please change '
+            'the value of environment variable LDSC2_ANACONDA_DIR or '
+            'remove the existing file at that location.'
+        )
+    else:
+        use_existing_anaconda_dir = False
+    if os.path.isdir(DIR):
+        use_existing_ldsc_dir = (
+            input(
+                f'There is already a directory at {DIR} - is this the '
+                'LDSC you wish to use? ([y]/n) >>>'
+            ).casefold() in {'', 'y', 'yes'}
+        )
+        if not use_existing_ldsc_dir:
+            print(
+                'Please change the value of environment variable LDSC2_DIR '
+                'or remove the existing directory at that location.'
+            )
+            return
+    elif os.path.exists(DIR):
+        raise RuntimeError(
+            f'There is a non-directory file at {DIR} Please change '
+            'the value of environment variable LDSC2_DIR or '
+            'remove the existing file at that location.'
+        )
+    else:
+        use_existing_ldsc_dir = False
+    if not use_existing_ldsc_dir:
+        clone_ldsc()
+    if not use_existing_anaconda_dir:
+        with TemporaryDirectory(dir=args.tmp_dir) as temp_dir:
+            anaconda_install_script_path = os.path.join(
+                temp_dir, 'Anaconda3-2019.03-Linux-x86_64.sh'
+            )
+            download_anaconda_install_script(anaconda_install_script_path)
+            check_hash(anaconda_install_script_path)
+            install_anaconda(anaconda_install_script_path)
+        configure_anaconda()
