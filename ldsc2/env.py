@@ -1,0 +1,27 @@
+#===============================================================================
+# env.py
+#===============================================================================
+
+# Imports ======================================================================
+
+import os
+import os.path
+
+
+
+
+# Constants ====================================================================
+
+DIR = os.environ.get('LDSC2_DIR', os.path.dirname(__file__))
+PLINKFILES = os.environ.get(
+    'LDSC2_PLINKFILES',
+    os.path.join(DIR, '1000G_EUR_Phase3_plink')
+)
+PLINKFILES_EAS = os.environ.get(
+    'LDSC2_PLINKFILES_EAS',
+    os.path.join(DIR, '1000G_Phase3_EAS_plinkfiles')
+)
+HAPMAP3_SNPS = os.environ.get(
+    'LDSC2_HAPMAP3_SNPS',
+    os.path.join(DIR, 'hapmap2_snps')
+)
