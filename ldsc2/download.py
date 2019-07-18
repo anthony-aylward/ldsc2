@@ -85,8 +85,7 @@ def configure_anaconda():
 
 def clone_ldsc():
     print(
-        'cloning the LDSC github repo to '
-        f"{os.path.join(DIR, 'ldsc')}"
+        f"cloning the LDSC github repo to {os.path.join(DIR, 'ldsc')}"
     )
     Git(DIR).clone(LDSC_GITHUB_REPO)
 
@@ -112,8 +111,9 @@ def download(
             copyfileobj(response, f)
         if not quiet:
             print(f'Extracting data to {data_dir}')
-        with TarFile(f'{data_dir}.tgz') as f:
-            f.extractall(data_dir)
+        subprocess.run(
+            ('tar', '-C', os.path.dirname(data_dir), '-zxvf', f'{data_dir}.tgz')
+        )
 
 
 def parse_arguments():

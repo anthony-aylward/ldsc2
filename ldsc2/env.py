@@ -31,5 +31,5 @@ PLINKFILES_EAS = os.environ.get(
 )
 HAPMAP3_SNPS = os.environ.get(
     'LDSC2_HAPMAP3_SNPS',
-    os.path.join(DIR, 'hapmap2_snps')
+    os.path.join(DIR, 'hapmap3_snps')
 )
