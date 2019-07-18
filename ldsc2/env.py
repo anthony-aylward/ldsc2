@@ -14,7 +14,7 @@ import os.path
 
 DIR = os.environ.get(
     'LDSC2_DIR',
-    os.path.join(os.path.dirname(__file__), 'ldsc')
+    os.path.dirname(__file__)
 )
 ANACONDA_DIR = os.environ.get(
     'LDSC2_ANACONDA_DIR',

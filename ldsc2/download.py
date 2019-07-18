@@ -88,7 +88,7 @@ def clone_ldsc():
         'cloning the LDSC github repo to '
         f"{os.path.join(os.path.dirname(DIR), 'LDSC')}"
     )
-    Git(os.path.dirname(DIR)).clone(LDSC_GITHUB_REPO)
+    Git(DIR).clone(LDSC_GITHUB_REPO)
 
 
 def download(
