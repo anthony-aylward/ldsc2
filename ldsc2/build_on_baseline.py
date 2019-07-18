@@ -31,6 +31,7 @@ import make_annot
 
 
 
+
 # Functions ====================================================================
 
 def make_annot_file(bed_file, bim_file, annot_file):
