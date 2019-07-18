@@ -26,7 +26,7 @@ from ldsc2.env import (
     DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
 )
 
-sys.path.append(os.path.join(DIR), 'ldsc')
+sys.path.append(os.path.join(DIR, 'ldsc'))
 import make_annot
 
 
