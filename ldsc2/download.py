@@ -163,12 +163,6 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
-    download(
-        plinkfiles_dir=args.plinkfiles,
-        plinkfiles_eas_dir=args.plinkfiles,
-        hapmap3_snps_dir=args.hapmap3_snps,
-        quiet=args.quiet
-    )
     if os.path.isdir(ANACONDA_DIR):
         use_existing_anaconda_dir = (
             input(
@@ -218,9 +212,15 @@ def main():
     if not use_existing_anaconda_dir:
         with TemporaryDirectory(dir=args.tmp_dir) as temp_dir:
             anaconda_install_script_path = os.path.join(
-                temp_dir, 'Anaconda3-2019.03-Linux-x86_64.sh'
+                temp_dir, 'Anaconda2-2019.03-Linux-x86_64.sh'
             )
             download_anaconda_install_script(anaconda_install_script_path)
             check_hash(anaconda_install_script_path)
             install_anaconda(anaconda_install_script_path)
         configure_anaconda()
+    download(
+        plinkfiles_dir=args.plinkfiles,
+        plinkfiles_eas_dir=args.plinkfiles,
+        hapmap3_snps_dir=args.hapmap3_snps,
+        quiet=args.quiet
+    )

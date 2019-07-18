@@ -18,7 +18,13 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
     ],
-    install_requires=['gitpython', 'funcgenom'],
+    install_requires=[
+        'pandas',
+        'numpy',
+        'pybedtools',
+        'gitpython',
+        'funcgenom'
+    ],
     entry_points={
         'console_scripts': [
             'ldsc2-download=ldsc2.download:main',

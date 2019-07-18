@@ -16,59 +16,43 @@ import funcgenom
 import gzip
 import os.path
 import subprocess
+import sys
 
+from collections import namedtuple
+from functools import partial
 from multiprocessing import Pool
+from pybedtools import BedTool
 
 from ldsc2.env import (
     DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
 )
 
+sys.path.append(DIR)
+import make_annot
+
 
 
 # Functions ====================================================================
 
-def construct_annot(args, chromosome):
-    with funcgenom.Genome() as genome:
-        print('loading variants on chromosome {}'.format(chromosome))
-        genome.load_variants(
-            '{}.{}.annot.gz'.format(args.blank, chromosome)
-        )
-        genome.sort_variants()
-        print('loading annotations on chromosome {}'.format(chromosome))
-        genome.load_annotations(args.annotations)
-        annotations = set(genome.chromosome[chromosome].annotations.keys())
-        genome.sort_annotations()
-        print('annotating variants on chromosome {}'.format(chromosome))
-        genome.annotate_variants(processes=args.processes)
-        print('writing output on chromosome {}'.format(chromosome))
-        with Pool(processes=args.processes) as pool:
-            pool.starmap(
-                write_annot,
-                ((args, genome, ann, chromosome) for ann in annotations)
-            )
-        return annotations
+def _make_annot_files(bed_file, bim_file, annot_file):
+    Args = namedtuple('Args', ('annot_file', 'bimfile'))
+    make_annot.make_annot_files(
+        Args(annot_file=annot_file, bimfile=bim_file),
+        BedTool(bed_file).sort().merge()
+    )
 
 
-def write_annot(args, genome, annotation, chromosome):
-    with gzip.open(
-        '{}.{}.{}.annot.gz'.format(args.output, annotation, chromosome),
-        'w'
-    ) as output_annot:
-        output_annot.write(
-            (
-                '\t'.join(
-                    genome.variants_header.tuple + ('ANNOT' + '\n',)
-                )
-                + '\n'.join(
-                    '\t'.join(
-                        variant.tuple
-                        + (str(int(annotation in variant.annotations)),)
-                    )
-                    for variant in genome.chromosome[chromosome].variants
-                )
-                + '\n'
-            ).encode()
+def make_annot_files(bed_file, bim_prefix, annot_prefix, processes=1):
+    def make_annot_chrom(chrom):
+        _make_annot_files(
+            bed_file,
+            f'{bim_prefix}.{chrom}.bim',
+            f'{annot_prefix}.{chrom}.annot.gz'
         )
+
+    with Pool(processes=processes) as pool:
+        pool.map(make_annot_chrom, range(1, 23))
+
 
 
 def ldsc(args, annotation, chromosome):
@@ -137,13 +121,6 @@ def parse_arguments():
         metavar='<prefix/for/snp/files>',
         default=os.path.join(PLINKFILES, '1000G_Phase3_plinkfiles'),
         help='prefix of snp files for input'
-    )
-    parser.add_argument(
-        '--skip-to-chr',
-        metavar='<int>',
-        type=int,
-        default=1,
-        help='skip to this chromosome [1]'
     )
     parser.add_argument(
         '--processes',
