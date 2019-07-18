@@ -17,7 +17,7 @@ from tarfile import TarFile
 from tempfile import TemporaryDirectory
 
 from ldsc2.env import (
-    DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
+    DIR, LDSC_DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
 )
 
 
@@ -191,10 +191,10 @@ def main():
         )
     else:
         use_existing_anaconda_dir = False
-    if os.path.isdir(DIR):
+    if os.path.isdir(LDSC_DIR):
         use_existing_ldsc_dir = (
             input(
-                f'There is already a directory at {DIR} - is this the '
+                f'There is already a directory at {LDSC_DIR} - is this the '
                 'LDSC you wish to use? ([y]/n) >>>'
             ).casefold() in {'', 'y', 'yes'}
         )
@@ -206,7 +206,7 @@ def main():
             return
     elif os.path.exists(DIR):
         raise RuntimeError(
-            f'There is a non-directory file at {DIR} Please change '
+            f'There is a non-directory file at {LDSC_DIR} Please change '
             'the value of environment variable LDSC2_DIR or '
             'remove the existing file at that location.'
         )

@@ -16,6 +16,7 @@ DIR = os.environ.get(
     'LDSC2_DIR',
     os.path.dirname(__file__)
 )
+LDSC_DIR = os.path.join(DIR, 'ldsc')
 ANACONDA_DIR = os.environ.get(
     'LDSC2_ANACONDA_DIR',
     os.path.join(os.path.dirname(__file__), 'anaconda2')
