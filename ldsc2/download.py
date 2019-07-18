@@ -204,7 +204,7 @@ def main():
                 'or remove the existing directory at that location.'
             )
             return
-    elif os.path.exists(DIR):
+    elif os.path.exists(LDSC_DIR):
         raise RuntimeError(
             f'There is a non-directory file at {LDSC_DIR} Please change '
             'the value of environment variable LDSC2_DIR or '
