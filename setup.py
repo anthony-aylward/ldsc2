@@ -22,8 +22,7 @@ setuptools.setup(
         'pandas',
         'numpy',
         'pybedtools',
-        'gitpython',
-        'funcgenom'
+        'gitpython'
     ],
     entry_points={
         'console_scripts': [

@@ -12,7 +12,6 @@ baseline model from Finucane et al. 2015
 # Imports ======================================================================
 
 import argparse
-import funcgenom
 import gzip
 import os.path
 import subprocess
