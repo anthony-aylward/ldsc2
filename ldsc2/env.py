@@ -21,6 +21,10 @@ ANACONDA_DIR = os.environ.get(
     os.path.join(os.path.dirname(__file__), 'anaconda2')
 )
 ANACONDA_PATH = os.path.join(ANACONDA_DIR, 'envs', 'ldsc', 'bin', 'python')
+HAPMAP3_SNPS = os.environ.get(
+    'LDSC2_HAPMAP3_SNPS',
+    os.path.join(DIR, 'hapmap3_snps')
+)
 PLINKFILES = os.environ.get(
     'LDSC2_PLINKFILES',
     os.path.join(DIR, '1000G_EUR_Phase3_plink')
@@ -28,8 +32,4 @@ PLINKFILES = os.environ.get(
 PLINKFILES_EAS = os.environ.get(
     'LDSC2_PLINKFILES_EAS',
     os.path.join(DIR, '1000G_Phase3_EAS_plinkfiles')
-)
-HAPMAP3_SNPS = os.environ.get(
-    'LDSC2_HAPMAP3_SNPS',
-    os.path.join(DIR, 'hapmap3_snps')
 )

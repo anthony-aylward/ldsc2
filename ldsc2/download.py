@@ -84,9 +84,7 @@ def configure_anaconda():
 
 
 def clone_ldsc():
-    print(
-        f"cloning the LDSC github repo to {os.path.join(DIR, 'ldsc')}"
-    )
+    print(f"cloning the LDSC github repo to {os.path.join(DIR, 'ldsc')}")
     Git(DIR).clone(LDSC_GITHUB_REPO)
 
 
