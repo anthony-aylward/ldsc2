@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='ldsc2',
-    version='0.0.7',
+    version='0.0.8',
     author='Anthony Aylward',
     author_email='aaylward@eng.ucsd.edu',
     description='Simplify stratified LD score regression',

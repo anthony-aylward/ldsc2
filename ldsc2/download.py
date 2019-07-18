@@ -17,7 +17,7 @@ from tarfile import TarFile
 from tempfile import TemporaryDirectory
 
 from ldsc2.env import (
-    DIR, LDSC_DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
+    DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
 )
 
 
@@ -86,7 +86,7 @@ def configure_anaconda():
 def clone_ldsc():
     print(
         'cloning the LDSC github repo to '
-        f"{os.path.join(os.path.dirname(DIR), 'LDSC')}"
+        f"{os.path.join(DIR, 'ldsc')}"
     )
     Git(DIR).clone(LDSC_GITHUB_REPO)
 
@@ -191,10 +191,11 @@ def main():
         )
     else:
         use_existing_anaconda_dir = False
-    if os.path.isdir(LDSC_DIR):
+    ldsc_dir = os.path.join(DIR, 'ldsc')
+    if os.path.isdir(ldsc_dir):
         use_existing_ldsc_dir = (
             input(
-                f'There is already a directory at {LDSC_DIR} - is this the '
+                f'There is already a directory at {ldsc_dir} - is this the '
                 'LDSC you wish to use? ([y]/n) >>>'
             ).casefold() in {'', 'y', 'yes'}
         )
@@ -204,9 +205,9 @@ def main():
                 'or remove the existing directory at that location.'
             )
             return
-    elif os.path.exists(LDSC_DIR):
+    elif os.path.exists(ldsc_dir):
         raise RuntimeError(
-            f'There is a non-directory file at {LDSC_DIR} Please change '
+            f'There is a non-directory file at {ldsc_dir} Please change '
             'the value of environment variable LDSC2_DIR or '
             'remove the existing file at that location.'
         )
