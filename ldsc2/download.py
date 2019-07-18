@@ -158,6 +158,11 @@ def parse_arguments():
         action='store_true',
         help='suppress status updates'
     )
+    parser.add_argument(
+        '--tmp-dir',
+        metavar='<path/to/tmp/dir>',
+        help='directory for temporary files'
+    )
     return parser.parse_args()
 
 
