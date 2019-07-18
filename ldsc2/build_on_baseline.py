@@ -63,25 +63,21 @@ def make_annot_files(bed_file, bim_prefix, annot_prefix, processes=1):
         )
 
 
-def ldsc(args, annotation, chromosome):
+def compute_ld_scores_chrom(
+    chrom,
+    annotation,
+    output_prefix,
+    plink_prefix=os.path.join(PLINKFILES, '1000G.EUR.QC')
+):
     subprocess.run(
         (
-            ANACONDA_PATH,
-            os.path.join(DIR, 'ldsc', 'ldsc.py'),
+            ANACONDA_PATH, os.path.join(DIR, 'ldsc', 'ldsc.py'),
             '--l2',
-            '--bfile', '{}.{}'.format(args.plink_prefix, chromosome),
+            '--bfile', f'{plink_prefix}.{chrom}',
             '--ld-wind-cm', '1',
-            '--annot', '{}.{}.{}.annot.gz'.format(
-                args.output,
-                annotation,
-                chromosome
-            ),
-            '--out', '{}.{}.{}'.format(
-                args.output,
-                annotation,
-                chromosome
-            ),
-            '--print-snps', '{}.{}.snp'.format(args.snp_prefix, chromosome)
+            '--annot', f'{output_prefix}.{annotation}.{chrom}.annot.gz',
+            '--out', f'{output_prefix}.{annotation}.{chrom}',
+            '--print-snps', f"{os.path.join(HAPMAP3_SNPS, 'hm')}.{chrom}.snp"
         )
     )
 
@@ -90,11 +86,17 @@ def main():
     """main loop"""
     args = parse_arguments()
     make_annot_files(
-        bed_file=args.annotations,
+        bed_file=args.annotation,
         bim_prefix=args.plink_prefix,
         annot_prefix=args.output,
         processes=args.processes
     )
+    for chrom in range(1, 23):
+        compute_ld_scores_chrom(
+            chrom,
+            args.annotation,
+            args.output
+        )
 
 
 def parse_arguments():
@@ -105,9 +107,9 @@ def parse_arguments():
         )
     )
     parser.add_argument(
-        'annotations',
+        'annotation',
         metavar='<path/to/annotations.bed>',
-        help='path to .bed file of annotations'
+        help='path to .bed file of annotation'
     )
     parser.add_argument(
         'output',
@@ -118,25 +120,19 @@ def parse_arguments():
         '--plink-prefix',
         metavar='<prefix/for/plink/files>',
         default=os.path.join(PLINKFILES, '1000G.EUR.QC'),
-        help='prefix of plink files for input'
+        help=(
+            'prefix of plink files for input '
+            f"(default: {os.path.join(PLINKFILES, '1000G.EUR.QC')})"
+        )
     )
     parser.add_argument(
         '--processes',
         metavar='<int>',
         type=int,
         default=1,
-        help='number of processes [1]'
+        help='number of processes (default: 1)'
     )
-    args = parser.parse_args()
-    if args.processes > 16:
-        raise Exception(
-            '{} processes, really? Annotating those variants takes a lot of '
-            'memory when multiprocessing, and more processes means more memory '
-            'consumption. You almost certainly don\'t need more than 16 '
-            'processes for this - trust me, it won\'t take THAT long.'
-            .format(args.processes)
-        )
-    return args
+    return parser.parse_args()
 
 
 
