@@ -75,7 +75,7 @@ def compute_ld_scores_chrom(
             '--l2',
             '--bfile', f'{plink_prefix}.{chrom}',
             '--ld-wind-cm', '1',
-            '--annot', f'{output_prefix}.{annotation}.{chrom}.annot.gz',
+            '--annot', f'{output_prefix}.{chrom}.annot.gz',
             '--out', f'{output_prefix}.{annotation}.{chrom}',
             '--print-snps', f"{os.path.join(HAPMAP3_SNPS, 'hm')}.{chrom}.snp"
         )
@@ -117,13 +117,15 @@ def parse_arguments():
         help='prefix for output files'
     )
     parser.add_argument(
+        '--pop',
+        choices=('EUR', 'EAS'),
+        default='EUR',
+        help='reference population (determines default plink files)'
+    )
+    parser.add_argument(
         '--plink-prefix',
         metavar='<prefix/for/plink/files>',
-        default=os.path.join(PLINKFILES, '1000G.EUR.QC'),
-        help=(
-            'prefix of plink files for input '
-            f"(default: {os.path.join(PLINKFILES, '1000G.EUR.QC')})"
-        )
+        help='prefix of user-provided plink files'
     )
     parser.add_argument(
         '--processes',
@@ -132,7 +134,13 @@ def parse_arguments():
         default=1,
         help='number of processes (default: 1)'
     )
-    return parser.parse_args()
+    args = parser.parse_args()
+    if not args.plink_prefix:
+        args.plink_prefix={
+            'EUR': os.path.join(PLINKFILES, '1000G.EUR.QC'),
+            'EAS': os.path.join(PLINKFILES_EAS, '1000G.EAS.QC')
+        }[args.pop]
+    return args
 
 
 
