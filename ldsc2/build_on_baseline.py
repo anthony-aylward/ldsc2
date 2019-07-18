@@ -76,7 +76,8 @@ def compute_ld_scores_chrom(
             '--bfile', f'{plink_prefix}.{chrom}',
             '--ld-wind-cm', '1',
             '--annot', f'{output_prefix}.{chrom}.annot.gz',
-            '--out', f'{output_prefix}.{annotation}.{chrom}',
+            '--thin-annot',
+            '--out', f'{output_prefix}.{chrom}',
             '--print-snps', f"{os.path.join(HAPMAP3_SNPS, 'hm')}.{chrom}.snp"
         )
     )
