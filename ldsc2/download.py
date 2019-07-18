@@ -226,7 +226,7 @@ def main():
         configure_anaconda()
     download(
         plinkfiles_dir=args.plinkfiles,
-        plinkfiles_eas_dir=args.plinkfiles,
+        plinkfiles_eas_dir=args.plinkfiles_eas,
         hapmap3_snps_dir=args.hapmap3_snps,
         quiet=args.quiet
     )
