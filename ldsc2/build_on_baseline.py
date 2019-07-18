@@ -34,7 +34,7 @@ import make_annot
 
 # Functions ====================================================================
 
-def _make_annot_files(bed_file, bim_file, annot_file):
+def make_annot_file(bed_file, bim_file, annot_file):
     Args = namedtuple('Args', ('annot_file', 'bimfile'))
     make_annot.make_annot_files(
         Args(annot_file=annot_file, bimfile=bim_file),
@@ -42,17 +42,25 @@ def _make_annot_files(bed_file, bim_file, annot_file):
     )
 
 
+def make_annot_file_chrom(chrom, bed_file, bim_prefix, annot_prefix):
+    make_annot_file(
+        bed_file,
+        f'{bim_prefix}.{chrom}.bim',
+        f'{annot_prefix}.{chrom}.annot.gz'
+    )
+
+
 def make_annot_files(bed_file, bim_prefix, annot_prefix, processes=1):
-    def make_annot_chrom(chrom):
-        _make_annot_files(
-            bed_file,
-            f'{bim_prefix}.{chrom}.bim',
-            f'{annot_prefix}.{chrom}.annot.gz'
-        )
-
     with Pool(processes=processes) as pool:
-        pool.map(make_annot_chrom, range(1, 23))
-
+        pool.map(
+            partial(
+                make_annot_file_chrom,
+                bed_file=bed_file,
+                bim_prefix=bim_prefix,
+                annot_prefix=annot_prefix
+            ),
+            range(1, 23)
+        )
 
 
 def ldsc(args, annotation, chromosome):
@@ -82,10 +90,12 @@ def main(args):
     """main loop"""
     
     args = parse_arguments()
-    for chromosome in range(args.skip_to_chr, 23):
-        annotations = construct_annot(args, chromosome)
-        for annotation in annotations:
-            ldsc(args, annotation, chromosome)
+    make_annot_files(
+        bed_file=args.annotations,
+        bim_prefix=args.plink_prefix,
+        annot_prefix=args.output,
+        processes=args.processes
+    )
 
 
 def parse_arguments():
@@ -94,11 +104,6 @@ def parse_arguments():
             'Generate a set of annotation-specific ld-score files for use with '
             'the baseline model from Finucane et al. 2015'
         )
-    )
-    parser.add_argument(
-        'blank',
-        metavar='<prefix/for/blank.annot.gz>',
-        help='prefix of blank .annot.gz files for input'
     )
     parser.add_argument(
         'annotations',
