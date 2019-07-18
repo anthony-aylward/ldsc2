@@ -78,7 +78,7 @@ def configure_anaconda():
     subprocess.run(
         (
             CONDA_PATH, 'env', 'create',
-            '--file', os.path.join(DIR, 'LDSC', 'environment.yml')
+            '--file', os.path.join(DIR, 'ldsc', 'environment.yml')
         )
     )
 
