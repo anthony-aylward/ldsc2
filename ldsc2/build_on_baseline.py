@@ -86,7 +86,7 @@ def ldsc(args, annotation, chromosome):
     )
 
 
-def main(args):
+def main():
     """main loop"""
     
     args = parse_arguments()
@@ -120,12 +120,6 @@ def parse_arguments():
         metavar='<prefix/for/plink/files>',
         default=os.path.join(PLINKFILES, '1000G.EUR.QC'),
         help='prefix of plink files for input'
-    )
-    parser.add_argument(
-        '--snp-prefix',
-        metavar='<prefix/for/snp/files>',
-        default=os.path.join(PLINKFILES, '1000G_Phase3_plinkfiles'),
-        help='prefix of snp files for input'
     )
     parser.add_argument(
         '--processes',
