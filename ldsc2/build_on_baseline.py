@@ -34,11 +34,10 @@ from ldsc2.env import (
 def make_annot_file(bed_file, bim_file, annot_file):
     subprocess.run(
         (
-            ANACONDA_PATH, os.path.join(DIR, 'ldsc', 'make_annot.py',
+            ANACONDA_PATH, os.path.join(DIR, 'ldsc', 'make_annot.py'),
             '--bed-file', bed_file,
             '--bimfile', bim_file,
             '--annot-file', annot_file
-            
         )
     )
 
