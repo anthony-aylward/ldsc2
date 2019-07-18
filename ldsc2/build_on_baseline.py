@@ -26,19 +26,20 @@ from ldsc2.env import (
     DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
 )
 
-sys.path.append(os.path.join(DIR, 'ldsc'))
-import make_annot
-
 
 
 
 # Functions ====================================================================
 
 def make_annot_file(bed_file, bim_file, annot_file):
-    Args = namedtuple('Args', ('annot_file', 'bimfile'))
-    make_annot.make_annot_files(
-        Args(annot_file=annot_file, bimfile=bim_file),
-        BedTool(bed_file).sort().merge()
+    subprocess.run(
+        (
+            ANACONDA_PATH, os.path.join(DIR, 'ldsc', 'make_annot.py',
+            '--bed-file', bed_file,
+            '--bimfile', bim_file,
+            '--annot-file', annot_file
+            
+        )
     )
 
 
@@ -67,7 +68,7 @@ def ldsc(args, annotation, chromosome):
     subprocess.run(
         (
             ANACONDA_PATH,
-            os.path.join(DIR, 'ldsc.py'),
+            os.path.join(DIR, 'ldsc', 'ldsc.py'),
             '--l2',
             '--bfile', '{}.{}'.format(args.plink_prefix, chromosome),
             '--ld-wind-cm', '1',
@@ -88,7 +89,6 @@ def ldsc(args, annotation, chromosome):
 
 def main():
     """main loop"""
-    
     args = parse_arguments()
     make_annot_files(
         bed_file=args.annotations,
