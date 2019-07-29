@@ -33,3 +33,11 @@ PLINKFILES_EAS = os.environ.get(
     'LDSC2_PLINKFILES_EAS',
     os.path.join(DIR, '1000G_Phase3_EAS_plinkfiles')
 )
+BASELINE = os.environ.get(
+    'LDSC2_BASELINE',
+    os.path.join(DIR, '1000G_Phase3_baseline')
+)
+BASELINE_EAS = os.environ.get(
+    'LDSC2_BASELINE_EAS',
+    os.path.join(DIR, '1000G_Phase3_EAS_baseline')
+)

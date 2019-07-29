@@ -17,7 +17,7 @@ from tarfile import TarFile
 from tempfile import TemporaryDirectory
 
 from ldsc2.env import (
-    DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
+    DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS, BASELINE, BASELINE_EAS
 )
 
 
@@ -38,7 +38,8 @@ LDSC_GITHUB_REPO = 'https://github.com/bulik/ldsc.git'
 PLINKFILES_URL = 'https://data.broadinstitute.org/alkesgroup/LDSCORE/1000G_Phase3_plinkfiles.tgz'
 PLINKFILES_EAS_URL = 'https://data.broadinstitute.org/alkesgroup/LDSCORE/1000G_Phase3_EAS_plinkfiles.tgz'
 HAPMAP3_SNPS_URL = 'https://data.broadinstitute.org/alkesgroup/LDSCORE/hapmap3_snps.tgz'
-
+BASELINE_URL = 'https://data.broadinstitute.org/alkesgroup/LDSCORE/1000G_Phase3_baseline_v1.1_ldscores.tgz'
+BASELINE_EAS_URL = 'https://data.broadinstitute.org/alkesgroup/LDSCORE/1000G_Phase3_EAS_baseline_v1.2_ldscores.tgz'
 
 
 
@@ -92,12 +93,16 @@ def download(
     hapmap3_snps_dir: str = HAPMAP3_SNPS,
     plinkfiles_dir: str = PLINKFILES,
     plinkfiles_eas_dir: str = PLINKFILES_EAS,
+    baseline_dir: str = BASELINE,
+    baseline_eas_dir: str = BASELINE_EAS,
     quiet: bool = False
 ):
     for data_url, data_dir in (
         (HAPMAP3_SNPS_URL, hapmap3_snps_dir),
         (PLINKFILES_URL, plinkfiles_dir),
-        (PLINKFILES_EAS_URL, plinkfiles_eas_dir)
+        (PLINKFILES_EAS_URL, plinkfiles_eas_dir),
+        (BASELINE_URL, baseline_dir),
+        (BASELINE_EAS_URL, baseline_eas_dir)
     ):
         if not quiet:
             print(f'Downloading data to {data_dir}.tgz')
@@ -140,6 +145,24 @@ def parse_arguments():
         help=(
             'destination for downloaded EAS plink files'
             f'[{PLINKFILES_EAS}]'
+        )
+    )
+    parser.add_argument(
+        '--baseline',
+        metavar='<dest/for/baseline/dir>',
+        default=BASELINE,
+        help=(
+            'destination for downloaded EUR baseline files'
+            f'[{BASELINE}]'
+        )
+    )
+    parser.add_argument(
+        '--baseline-eas',
+        metavar='<dest/for/baselinedir>',
+        default=BASELINE_EAS,
+        help=(
+            'destination for downloaded EAS baseline files'
+            f'[{BASELINE_EAS}]'
         )
     )
     parser.add_argument(
@@ -225,6 +248,8 @@ def main():
     download(
         plinkfiles_dir=args.plinkfiles,
         plinkfiles_eas_dir=args.plinkfiles_eas,
+        baseline_dir=args.baseline,
+        baseline_eas_dir=args.baseline_eas,
         hapmap3_snps_dir=args.hapmap3_snps,
         quiet=args.quiet
     )
