@@ -12,15 +12,13 @@ baseline model from Finucane et al. 2015
 # Imports ======================================================================
 
 import argparse
+import funcgenom
 import gzip
 import os.path
 import subprocess
-import sys
 
-from collections import namedtuple
 from functools import partial
 from multiprocessing import Pool
-from pybedtools import BedTool
 
 from ldsc2.env import (
     DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS

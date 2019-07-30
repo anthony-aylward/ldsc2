@@ -4,6 +4,7 @@
 
 # Imports ======================================================================
 
+import gzip
 import os
 import os.path
 import subprocess
@@ -117,6 +118,34 @@ def download(
         subprocess.run(
             ('tar', '-C', os.path.dirname(data_dir), '-zxvf', f'{data_dir}.tgz')
         )
+
+
+def extract_blank_annot():
+    baseline_dir = os.path.join(DIR, 'baseline_v1.1')
+    baseline_eas_dir = DIR
+    blank_dir = os.path.join(DIR, 'blank')
+    blank_eas_dir = os.path.join(DIR, 'blank_eas')
+    for chrom in range(1, 23):
+        with gzip.open(
+            os.path.join(baseline_dir, f'baseline.{chrom}.annot.gz'), 'rt'
+        ) as f0, gzip.open(
+            os.path.join(blank_dir, f'blank.{chrom}.annot.gz'), 'wb'
+        ) as f1:
+            f1.write(
+                ''.join(
+                    '\t'.join(line.split()[:4]) + '\n' for line in f0
+                ).encode()
+            )
+        with gzip.open(
+            os.path.join(baseline_eas_dir, f'baseline.{chrom}.annot.gz'), 'rt'
+        ) as f0, gzip.open(
+            os.path.join(blank_eas_dir, f'blank.{chrom}.annot.gz'), 'wb'
+        ) as f1:
+            f1.write(
+                ''.join(
+                    '\t'.join(line.split()[:4]) + '\n' for line in f0
+                ).encode()
+            )
 
 
 def parse_arguments():
