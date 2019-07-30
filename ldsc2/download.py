@@ -282,3 +282,4 @@ def main():
         hapmap3_snps_dir=args.hapmap3_snps,
         quiet=args.quiet
     )
+    extract_blank_annot()
