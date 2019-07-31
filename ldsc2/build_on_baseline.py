@@ -19,9 +19,11 @@ import subprocess
 
 from functools import partial
 from multiprocessing import Pool
+from tempfile import TemporaryDirectory
 
 from ldsc2.env import (
-    DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
+    DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS,
+    BASELINE, BASELINE_EAS, BLANK, BLANK_EAS
 )
 
 
@@ -29,36 +31,57 @@ from ldsc2.env import (
 
 # Functions ====================================================================
 
-def make_annot_file(bed_file, bim_file, annot_file):
-    subprocess.run(
-        (
-            ANACONDA_PATH, os.path.join(DIR, 'ldsc', 'make_annot.py'),
-            '--bed-file', bed_file,
-            '--bimfile', bim_file,
-            '--annot-file', annot_file
+def write_annot(output_prefix, genome, chrom, annotation):
+    with gzip.open(
+        '{}.{}.{}.annot.gz'.format(output_prefix, annotation, chrom),
+        'wb'
+    ) as output_annot:
+        output_annot.write(
+            (
+                '\t'.join(
+                    genome.variants_header.tuple + ('ANNOT' + '\n',)
+                )
+                + '\n'.join(
+                    '\t'.join(
+                        variant.tuple
+                        + (str(int(annotation in variant.annotations)),)
+                    )
+                    for variant in genome.chromosome[chrom].variants
+                )
+                + '\n'
+            ).encode()
         )
-    )
 
 
-def make_annot_file_chrom(chrom, bed_file, bim_prefix, annot_prefix):
-    make_annot_file(
-        bed_file,
-        f'{bim_prefix}.{chrom}.bim',
-        f'{annot_prefix}.{chrom}.annot.gz'
-    )
-
-
-def make_annot_files(bed_file, bim_prefix, annot_prefix, processes=1):
-    with Pool(processes=processes) as pool:
-        pool.map(
-            partial(
-                make_annot_file_chrom,
-                bed_file=bed_file,
-                bim_prefix=bim_prefix,
-                annot_prefix=annot_prefix
-            ),
-            range(1, 23)
-        )
+def construct_annot(
+    output_prefix,
+    chrom,
+    annotations,
+    blank=BLANK,
+    processes=1
+):
+    with funcgenom.Genome() as genome:
+        print(f'loading variants on chromosome {chrom}')
+        genome.load_variants(f'{blank}.{chrom}.annot.gz')
+        genome.sort_variants()
+        print(f'loading annotations on chromosome {chrom}')
+        genome.load_annotations(annotations)
+        annotation_set = set(genome.chromosome[chrom].annotations.keys())
+        genome.sort_annotations()
+        print(f'annotating variants on chromosome {chrom}')
+        genome.annotate_variants(processes=processes)
+        print(f'writing output on chromosome {chrom}')
+        with Pool(processes=processes) as pool:
+            pool.map(
+                partial(
+                    write_annot,
+                    output_prefix=output_prefix,
+                    genome=genome,
+                    chromosome=chrom
+                ),
+                annotation_set
+            )
+        return annotations
 
 
 def compute_ld_scores_chrom(
@@ -83,14 +106,10 @@ def compute_ld_scores_chrom(
 
 def main():
     """main loop"""
+
     args = parse_arguments()
-    make_annot_files(
-        bed_file=args.annotation,
-        bim_prefix=args.plink_prefix,
-        annot_prefix=args.output,
-        processes=args.processes
-    )
     for chrom in range(1, 23):
+        annotations = construct_annot(args.output, chrom, args.annotation)
         compute_ld_scores_chrom(
             chrom,
             args.annotation,
@@ -139,6 +158,14 @@ def parse_arguments():
             'EUR': os.path.join(PLINKFILES, '1000G.EUR.QC'),
             'EAS': os.path.join(PLINKFILES_EAS, '1000G.EAS.QC')
         }[args.pop]
+    if args.processes > 16:
+        raise Exception(
+            f'{args.processes} processes, really? Annotating those variants '
+            'takes a lot of memory when multiprocessing, and more processes '
+            'means more memory consumption. You almost certainly don\'t need '
+            'more than 16 processes for this - trust me, it won\'t take THAT '
+            'long.'
+        )
     return args
 
 
