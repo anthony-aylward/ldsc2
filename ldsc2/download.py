@@ -125,6 +125,9 @@ def extract_blank_annot():
     baseline_eas_dir = DIR
     blank_dir = os.path.join(DIR, 'blank')
     blank_eas_dir = os.path.join(DIR, 'blank_eas')
+    for d in blank_dir, blank_eas_dir:
+        if not os.path.isdir(d):
+            os.mkdir(d)
     for chrom in range(1, 23):
         with gzip.open(
             os.path.join(baseline_dir, f'baseline.{chrom}.annot.gz'), 'rt'
