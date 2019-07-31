@@ -18,7 +18,8 @@ from tarfile import TarFile
 from tempfile import TemporaryDirectory
 
 from ldsc2.env import (
-    DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS, BASELINE, BASELINE_EAS
+    DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS, BASELINE,
+    BASELINE_EAS, BLANK, BLANK_EAS
 )
 
 
@@ -121,34 +122,23 @@ def download(
 
 
 def extract_blank_annot():
-    baseline_dir = os.path.join(DIR, 'baseline_v1.1')
-    baseline_eas_dir = DIR
-    blank_dir = os.path.join(DIR, 'blank')
-    blank_eas_dir = os.path.join(DIR, 'blank_eas')
-    for d in blank_dir, blank_eas_dir:
-        if not os.path.isdir(d):
-            os.mkdir(d)
-    for chrom in range(1, 23):
-        with gzip.open(
-            os.path.join(baseline_dir, f'baseline.{chrom}.annot.gz'), 'rt'
-        ) as f0, gzip.open(
-            os.path.join(blank_dir, f'blank.{chrom}.annot.gz'), 'wb'
-        ) as f1:
-            f1.write(
-                ''.join(
-                    '\t'.join(line.split()[:4]) + '\n' for line in f0
-                ).encode()
-            )
-        with gzip.open(
-            os.path.join(baseline_eas_dir, f'baseline.{chrom}.annot.gz'), 'rt'
-        ) as f0, gzip.open(
-            os.path.join(blank_eas_dir, f'blank.{chrom}.annot.gz'), 'wb'
-        ) as f1:
-            f1.write(
-                ''.join(
-                    '\t'.join(line.split()[:4]) + '\n' for line in f0
-                ).encode()
-            )
+    for baseline_dir, blank_dir in (
+        (os.path.join(DIR, 'baseline_v1.1'), BLANK),
+        (DIR, BLANK_EAS)
+    ):
+        if not os.path.isdir(blank_dir):
+            os.mkdir(blank_dir)
+        for chrom in range(1, 23):
+            with gzip.open(
+                os.path.join(baseline_dir, f'baseline.{chrom}.annot.gz'), 'rt'
+            ) as f0, gzip.open(
+                os.path.join(BLANK, f'blank.{chrom}.annot.gz'), 'wb'
+            ) as f1:
+                f1.write(
+                    ''.join(
+                        '\t'.join(line.split()[:4]) + '\n' for line in f0
+                    ).encode()
+                )
 
 
 def parse_arguments():

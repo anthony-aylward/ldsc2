@@ -41,3 +41,5 @@ BASELINE_EAS = os.environ.get(
     'LDSC2_BASELINE_EAS',
     os.path.join(DIR, '1000G_Phase3_EAS_baseline')
 )
+BLANK = os.environ.get('LDSC2_BLANK', os.path.join(DIR, 'blank'))
+BLANK_EAS = os.environ.get('LDSC2_BLANK_EAS', os.path.join(DIR, 'blank_eas'))
