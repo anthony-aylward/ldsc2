@@ -21,7 +21,7 @@ from functools import partial
 from multiprocessing import Pool
 
 from ldsc2.env import (
-    DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
+    DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS, SNPS, SNPS_EAS
 )
 
 
@@ -76,7 +76,7 @@ def compute_ld_scores_chrom(
             '--annot', f'{output_prefix}.{chrom}.annot.gz',
             '--thin-annot',
             '--out', f'{output_prefix}.{chrom}',
-            '--print-snps', f"{os.path.join(HAPMAP3_SNPS, 'hm')}.{chrom}.snp"
+            '--print-snps', f"{os.path.join(SNPS, 'snps')}.{chrom}.snp"
         )
     )
 
