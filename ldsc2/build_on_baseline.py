@@ -65,7 +65,8 @@ def compute_ld_scores_chrom(
     chrom,
     annotation,
     output_prefix,
-    plink_prefix=os.path.join(PLINKFILES, '1000G.EUR.QC')
+    plink_prefix=os.path.join(PLINKFILES, '1000G.EUR.QC'),
+    snps_prefix=os.path.join(SNPS, 'snps')
 ):
     subprocess.run(
         (
@@ -76,7 +77,7 @@ def compute_ld_scores_chrom(
             '--annot', f'{output_prefix}.{chrom}.annot.gz',
             '--thin-annot',
             '--out', f'{output_prefix}.{chrom}',
-            '--print-snps', f"{os.path.join(SNPS, 'snps')}.{chrom}.snp"
+            '--print-snps', f"{snps_prefix}.{chrom}.snp"
         )
     )
 
@@ -94,7 +95,9 @@ def main():
         compute_ld_scores_chrom(
             chrom,
             args.annotation,
-            args.output
+            args.output,
+            plink_prefix=args.plink_prefix,
+            snps_prefix=args.snps_prefix
         )
 
 
@@ -127,6 +130,11 @@ def parse_arguments():
         help='prefix of user-provided plink files'
     )
     parser.add_argument(
+        '--snps-prefix',
+        metavar='<prefix/for/snps/files>',
+        help='prefix of user-provided snps files'
+    )
+    parser.add_argument(
         '--processes',
         metavar='<int>',
         type=int,
@@ -138,6 +146,11 @@ def parse_arguments():
         args.plink_prefix={
             'EUR': os.path.join(PLINKFILES, '1000G.EUR.QC'),
             'EAS': os.path.join(PLINKFILES_EAS, '1000G.EAS.QC')
+        }[args.pop]
+    if not args.snps_prefix:
+        args.snps_prefix={
+            'EUR': os.path.join(SNPS, 'snps'),
+            'EAS': os.path.join(SNPS_EAS, 'snps')
         }[args.pop]
     return args
 
