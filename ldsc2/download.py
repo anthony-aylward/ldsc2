@@ -14,7 +14,6 @@ from git import Git
 from hashlib import sha256
 from urllib.request import urlopen
 from shutil import copyfileobj
-from tarfile import TarFile
 from tempfile import TemporaryDirectory
 
 from ldsc2.env import (

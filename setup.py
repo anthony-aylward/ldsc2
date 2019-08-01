@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='ldsc2',
-    version='0.0.36',
+    version='0.0.37',
     author='Anthony Aylward',
     author_email='aaylward@eng.ucsd.edu',
     description='Simplify stratified LD score regression',
@@ -18,13 +18,7 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent"
     ],
-    install_requires=[
-        'funcgenom',
-        'gitpython',
-        'pandas',
-        'pybedtools',
-        'numpy'
-    ],
+    install_requires=['gitpython'],
     entry_points={
         'console_scripts': [
             'ldsc2-download=ldsc2.download:main',
