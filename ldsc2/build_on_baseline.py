@@ -19,7 +19,7 @@ from functools import partial
 from multiprocessing import Pool
 
 from ldsc2.env import (
-    DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS, SNPS, SNPS_EAS
+    DIR, ANACONDA_PATH, PLINKFILES, PLINKFILES_EAS, SNPS, SNPS_EAS
 )
 
 
