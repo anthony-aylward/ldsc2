@@ -30,7 +30,7 @@ from ldsc2.env import (
 
 # Functions ====================================================================
 
-def write_annot(chrom, annotation, output_prefix, genome):
+def write_annot(annotation, chrom, output_prefix, genome):
     with gzip.open(
         '{}.{}.{}.annot.gz'.format(output_prefix, annotation, chrom),
         'wb'
@@ -53,8 +53,8 @@ def write_annot(chrom, annotation, output_prefix, genome):
 
 
 def construct_annot(
-    chrom,
     annotations,
+    chrom,
     output_prefix,
     blank=BLANK,
     processes=1
@@ -84,8 +84,8 @@ def construct_annot(
 
 
 def compute_ld_scores_chrom(
-    chrom,
     annotation,
+    chrom,
     output_prefix,
     plink_prefix=os.path.join(PLINKFILES, '1000G.EUR.QC')
 ):
@@ -108,11 +108,9 @@ def main():
 
     args = parse_arguments()
     for chrom in range(1, 23):
-        construct_annot(chrom, args.annotation, args.output)
+        construct_annot(args.annotation, chrom, args.output)
         compute_ld_scores_chrom(
-            chrom,
-            args.annotation,
-            args.output
+            args.annotation, chrom, args.output
         )
 
 
