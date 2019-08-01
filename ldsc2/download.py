@@ -19,7 +19,7 @@ from tempfile import TemporaryDirectory
 
 from ldsc2.env import (
     DIR, ANACONDA_DIR, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS, BASELINE,
-    BASELINE_EAS, BLANK, BLANK_EAS
+    BASELINE_EAS, SNPS, SNPS_EAS
 )
 
 
@@ -121,24 +121,20 @@ def download(
         )
 
 
-def extract_blank_annot():
-    for baseline_dir, blank_dir in (
-        (os.path.join(DIR, 'baseline_v1.1'), BLANK),
-        (DIR, BLANK_EAS)
+def extract_snps():
+    for baseline_dir, snps_dir in (
+        (os.path.join(DIR, 'baseline_v1.1'), SNPS),
+        (DIR, SNPS_EAS)
     ):
-        if not os.path.isdir(blank_dir):
-            os.mkdir(blank_dir)
+        if not os.path.isdir(snps_dir):
+            os.mkdir(snps_dir)
         for chrom in range(1, 23):
             with gzip.open(
                 os.path.join(baseline_dir, f'baseline.{chrom}.annot.gz'), 'rt'
-            ) as f0, gzip.open(
-                os.path.join(BLANK, f'blank.{chrom}.annot.gz'), 'wb'
+            ) as f0, open(
+                os.path.join(SNPS, f'snps.{chrom}.annot.gz'), 'w'
             ) as f1:
-                f1.write(
-                    ''.join(
-                        '\t'.join(line.split()[:4]) + '\n' for line in f0
-                    ).encode()
-                )
+                f1.write('\n'.join(line.split()[2] for line in f0) + '\n')
 
 
 def parse_arguments():
@@ -275,4 +271,4 @@ def main():
         hapmap3_snps_dir=args.hapmap3_snps,
         quiet=args.quiet
     )
-    extract_blank_annot()
+    extract_snps()

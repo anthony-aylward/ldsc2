@@ -21,8 +21,7 @@ from functools import partial
 from multiprocessing import Pool
 
 from ldsc2.env import (
-    DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS,
-    BASELINE, BASELINE_EAS, BLANK, BLANK_EAS
+    DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS
 )
 
 
@@ -30,62 +29,41 @@ from ldsc2.env import (
 
 # Functions ====================================================================
 
-def write_annot(annotation, chrom, output_prefix, genome):
-    with gzip.open(
-        '{}.{}.{}.annot.gz'.format(output_prefix, annotation, chrom),
-        'wb'
-    ) as output_annot:
-        output_annot.write(
-            (
-                '\t'.join(
-                    genome.variants_header.tuple + ('ANNOT' + '\n',)
-                )
-                + '\n'.join(
-                    '\t'.join(
-                        variant.tuple
-                        + (str(int(annotation in variant.annotations)),)
-                    )
-                    for variant in genome.chromosome[chrom].variants
-                )
-                + '\n'
-            ).encode()
+def make_annot_file(bed_file, bim_file, annot_file):
+    subprocess.run(
+        (
+            ANACONDA_PATH, os.path.join(DIR, 'ldsc', 'make_annot.py'),
+            '--bed-file', bed_file,
+            '--bimfile', bim_file,
+            '--annot-file', annot_file
+        )
+    )
+
+
+def make_annot_file_chrom(chrom, bed_file, bim_prefix, annot_prefix):
+    make_annot_file(
+        bed_file,
+        f'{bim_prefix}.{chrom}.bim',
+        f'{annot_prefix}.{chrom}.annot.gz'
+    )
+
+
+def make_annot_files(bed_file, bim_prefix, annot_prefix, processes=1):
+    with Pool(processes=processes) as pool:
+        pool.map(
+            partial(
+                make_annot_file_chrom,
+                bed_file=bed_file,
+                bim_prefix=bim_prefix,
+                annot_prefix=annot_prefix
+            ),
+            range(1, 23)
         )
 
 
-def construct_annot(
-    annotations,
-    chrom,
-    output_prefix,
-    blank=BLANK,
-    processes=1
-):
-    with funcgenom.Genome() as genome:
-        print(f'loading variants on chromosome {chrom}')
-        genome.load_variants(os.path.join(blank, f'blank.{chrom}.annot.gz'))
-        genome.sort_variants()
-        print(f'loading annotations on chromosome {chrom}')
-        genome.load_annotations(annotations)
-        annotation_set = set(genome.chromosome[chrom].annotations.keys())
-        genome.sort_annotations()
-        print(f'annotating variants on chromosome {chrom}')
-        genome.annotate_variants(processes=processes)
-        print(f'writing output on chromosome {chrom}')
-        with Pool(processes=processes) as pool:
-            pool.map(
-                partial(
-                    write_annot,
-                    chrom=chrom,
-                    output_prefix=output_prefix,
-                    genome=genome
-                ),
-                annotation_set
-            )
-        return annotation_set
-
-
 def compute_ld_scores_chrom(
-    annotation,
     chrom,
+    annotation,
     output_prefix,
     plink_prefix=os.path.join(PLINKFILES, '1000G.EUR.QC')
 ):
@@ -95,7 +73,7 @@ def compute_ld_scores_chrom(
             '--l2',
             '--bfile', f'{plink_prefix}.{chrom}',
             '--ld-wind-cm', '1',
-            '--annot', f'{output_prefix}.{annotation}.{chrom}.annot.gz',
+            '--annot', f'{output_prefix}.{chrom}.annot.gz',
             '--thin-annot',
             '--out', f'{output_prefix}.{chrom}',
             '--print-snps', f"{os.path.join(HAPMAP3_SNPS, 'hm')}.{chrom}.snp"
@@ -105,12 +83,19 @@ def compute_ld_scores_chrom(
 
 def main():
     """main loop"""
-
     args = parse_arguments()
+    make_annot_files(
+        bed_file=args.annotation,
+        bim_prefix=args.plink_prefix,
+        annot_prefix=args.output,
+        processes=args.processes
+    )
     for chrom in range(1, 23):
-        annotation_set = construct_annot(args.annotation, chrom, args.output)
-        for annotation in annotation_set:
-            compute_ld_scores_chrom(annotation, chrom, args.output)
+        compute_ld_scores_chrom(
+            chrom,
+            args.annotation,
+            args.output
+        )
 
 
 def parse_arguments():
@@ -154,14 +139,6 @@ def parse_arguments():
             'EUR': os.path.join(PLINKFILES, '1000G.EUR.QC'),
             'EAS': os.path.join(PLINKFILES_EAS, '1000G.EAS.QC')
         }[args.pop]
-    if args.processes > 16:
-        raise Exception(
-            f'{args.processes} processes, really? Annotating those variants '
-            'takes a lot of memory when multiprocessing, and more processes '
-            'means more memory consumption. You almost certainly don\'t need '
-            'more than 16 processes for this - trust me, it won\'t take THAT '
-            'long.'
-        )
     return args
 
 
