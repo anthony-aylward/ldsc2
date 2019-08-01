@@ -19,7 +19,6 @@ import subprocess
 
 from functools import partial
 from multiprocessing import Pool
-from tempfile import TemporaryDirectory
 
 from ldsc2.env import (
     DIR, ANACONDA_PATH, HAPMAP3_SNPS, PLINKFILES, PLINKFILES_EAS,
@@ -62,7 +61,7 @@ def construct_annot(
 ):
     with funcgenom.Genome() as genome:
         print(f'loading variants on chromosome {chrom}')
-        genome.load_variants(f'{blank}.{chrom}.annot.gz')
+        genome.load_variants(os.path.join(blank, f'blank.{chrom}.annot.gz'))
         genome.sort_variants()
         print(f'loading annotations on chromosome {chrom}')
         genome.load_annotations(annotations)
@@ -109,7 +108,7 @@ def main():
 
     args = parse_arguments()
     for chrom in range(1, 23):
-        annotations = construct_annot(args.output, chrom, args.annotation)
+        construct_annot(args.output, chrom, args.annotation)
         compute_ld_scores_chrom(
             chrom,
             args.annotation,
