@@ -132,8 +132,9 @@ def extract_snps():
             with gzip.open(
                 os.path.join(baseline_dir, f'baseline.{chrom}.annot.gz'), 'rt'
             ) as f0, open(
-                os.path.join(SNPS, f'snps.{chrom}.annot.gz'), 'w'
+                os.path.join(snps_dir, f'snps.{chrom}.snp'), 'w'
             ) as f1:
+                f0.readline()
                 f1.write('\n'.join(line.split()[2] for line in f0) + '\n')
 
 
