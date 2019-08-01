@@ -30,7 +30,7 @@ from ldsc2.env import (
 
 # Functions ====================================================================
 
-def write_annot(output_prefix, genome, chrom, annotation):
+def write_annot(annotation, genome, chrom, output_prefix):
     with gzip.open(
         '{}.{}.{}.annot.gz'.format(output_prefix, annotation, chrom),
         'wb'
@@ -74,9 +74,9 @@ def construct_annot(
             pool.map(
                 partial(
                     write_annot,
-                    output_prefix=output_prefix,
                     genome=genome,
-                    chromosome=chrom
+                    chrom=chrom,
+                    output_prefix=output_prefix
                 ),
                 annotation_set
             )
