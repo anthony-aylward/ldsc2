@@ -109,6 +109,7 @@ def main():
     args = parse_arguments()
     for chrom in range(1, 23):
         annotations = construct_annot(args.annotation, chrom, args.output)
+        print(annotations)
         for annotation in annotations:
             compute_ld_scores_chrom(annotation, chrom, args.output)
 
