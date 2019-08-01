@@ -30,7 +30,7 @@ from ldsc2.env import (
 
 # Functions ====================================================================
 
-def write_annot(annotation, genome, chrom, output_prefix):
+def write_annot(chrom, annotation, output_prefix, genome):
     with gzip.open(
         '{}.{}.{}.annot.gz'.format(output_prefix, annotation, chrom),
         'wb'
@@ -53,9 +53,9 @@ def write_annot(annotation, genome, chrom, output_prefix):
 
 
 def construct_annot(
-    output_prefix,
     chrom,
     annotations,
+    output_prefix,
     blank=BLANK,
     processes=1
 ):
@@ -74,9 +74,9 @@ def construct_annot(
             pool.map(
                 partial(
                     write_annot,
-                    genome=genome,
                     chrom=chrom,
-                    output_prefix=output_prefix
+                    output_prefix=output_prefix,
+                    genome=genome
                 ),
                 annotation_set
             )
@@ -108,7 +108,7 @@ def main():
 
     args = parse_arguments()
     for chrom in range(1, 23):
-        construct_annot(args.output, chrom, args.annotation)
+        construct_annot(chrom, args.annotation, args.output)
         compute_ld_scores_chrom(
             chrom,
             args.annotation,
