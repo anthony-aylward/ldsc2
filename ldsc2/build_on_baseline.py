@@ -95,7 +95,7 @@ def compute_ld_scores_chrom(
             '--l2',
             '--bfile', f'{plink_prefix}.{chrom}',
             '--ld-wind-cm', '1',
-            '--annot', f'{output_prefix}.{chrom}.annot.gz',
+            '--annot', f'{output_prefix}.{annotation}.{chrom}.annot.gz',
             '--thin-annot',
             '--out', f'{output_prefix}.{chrom}',
             '--print-snps', f"{os.path.join(HAPMAP3_SNPS, 'hm')}.{chrom}.snp"
@@ -108,10 +108,9 @@ def main():
 
     args = parse_arguments()
     for chrom in range(1, 23):
-        construct_annot(args.annotation, chrom, args.output)
-        compute_ld_scores_chrom(
-            args.annotation, chrom, args.output
-        )
+        annotations = construct_annot(args.annotation, chrom, args.output)
+        for annotation in annotations:
+            compute_ld_scores_chrom(annotation, chrom, args.output)
 
 
 def parse_arguments():
