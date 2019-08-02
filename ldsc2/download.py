@@ -129,12 +129,13 @@ def extract_snps():
             os.mkdir(snps_dir)
         for chrom in range(1, 23):
             with gzip.open(
-                os.path.join(baseline_dir, f'baseline.{chrom}.annot.gz'), 'rt'
+                os.path.join(baseline_dir, f'baseline.{chrom}.l2.ldscore.gz'),
+                'rt'
             ) as f0, open(
                 os.path.join(snps_dir, f'snps.{chrom}.snp'), 'w'
             ) as f1:
                 f0.readline()
-                f1.write('\n'.join(line.split()[2] for line in f0) + '\n')
+                f1.write('\n'.join(line.split()[1] for line in f0) + '\n')
 
 
 def parse_arguments():
